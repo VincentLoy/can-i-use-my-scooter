@@ -35,6 +35,10 @@ class CanIUseMyScooter(object):
         if r.status_code == 200:
             print('ok, message sent')
             return True
+        elif r.status_code == 402:
+            print('Vous avez envoyé trop de message en trop peu de temps...')
+        elif r.status_code == 500:
+            print('Server error, please try again later')
         else:
             print('Error sending the message : {}'.format(r.status_code))
             return False
@@ -65,10 +69,13 @@ class CanIUseMyScooter(object):
         WANTED = MORNING + AFTERNOON
 
         def hourly():
+            already_used = []
             for hourly in hourly_result['hourly_forecast']:
                 current_hour = hourly['FCTTIME']['hour']
 
-                if int(current_hour) in WANTED:
+                if int(current_hour) in WANTED and int(current_hour) not in already_used:
+                    already_used.append(int(current_hour))
+
                     yield {
                         'hour': int(current_hour),
                         'pop': int(hourly['pop'])
@@ -82,15 +89,14 @@ class CanIUseMyScooter(object):
 
             PHRASE.append('{}h : {}%'.format(x['hour'], x['pop']))
 
-
-        morning_avg = sum(MORNING_POP) / float(len(MORNING_POP))
-        afternoon_avg = sum(AFTERNOON_POP) / float(len(AFTERNOON_POP))
-        global_avg = (morning_avg + afternoon_avg) / 2.0
+        morning_avg = int(sum(MORNING_POP) / float(len(MORNING_POP)))
+        afternoon_avg = int(sum(AFTERNOON_POP) / float(len(AFTERNOON_POP)))
+        global_avg = int((morning_avg + afternoon_avg) / 2)
 
         MESSAGE += ', '.join(PHRASE) + '.\n\n'
-        MESSAGE += 'Moyenne du matin : {}% \n'.format(morning_avg)
-        MESSAGE += 'Moyenne de l\'après-midi : {}% \n'.format(afternoon_avg)
-        MESSAGE += 'Moyenne de la journée : {}% \n\n'.format(global_avg)
+        MESSAGE += 'Moy. du matin : {}% \n'.format(morning_avg)
+        MESSAGE += 'Moy. de l\'après-midi : {}% \n'.format(afternoon_avg)
+        MESSAGE += 'Moy. de la journée : {}% \n\n'.format(global_avg)
 
         if global_avg <= 33:
             MESSAGE += 'Result : Ideal'
@@ -100,6 +106,8 @@ class CanIUseMyScooter(object):
             MESSAGE += 'Result : Favorable'
         else:
             MESSAGE += 'Result : Défavorable'
+
+        print(MESSAGE)
 
         return MESSAGE
 
