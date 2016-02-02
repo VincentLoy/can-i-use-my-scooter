@@ -2,7 +2,6 @@
 
 from __future__ import unicode_literals
 
-import pprint
 from urllib import parse
 import json
 import optparse
@@ -122,8 +121,7 @@ def main():
 
     options, arguments = p.parse_args()
     fc = CanIUseMyScooter(options.region.upper(), options.city.title().replace(' ', '_'))
-    # pprint.PrettyPrinter().pprint(fc.get_hourly())
-    print(fc.send_sms(fc.get_hourly()))
+    fc.send_sms(fc.get_hourly())
 
 if __name__ == '__main__':
     main()
