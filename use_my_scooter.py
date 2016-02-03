@@ -5,10 +5,9 @@ from __future__ import unicode_literals
 from urllib import parse
 import json
 import optparse
+from os import getenv
 
 import requests
-
-from os import getenv
 
 
 class CanIUseMyScooter(object):
